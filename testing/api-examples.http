@@ -1,0 +1,14 @@
+### Unauth smoke (should be 401/403)
+GET http://localhost:3000/api/shifts
+
+###
+GET http://localhost:3000/api/settings
+
+###
+GET http://localhost:3000/api/reports/kpi
+
+### Notes
+# For authenticated API calls, use browser session cookies.
+# Easiest: open DevTools -> Application -> Cookies -> copy `next-auth.session-token` (or similar)
+# and add it to `Cookie:` header in requests below.
+

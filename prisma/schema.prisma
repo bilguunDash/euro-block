@@ -1,0 +1,1077 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ──────────────────────────────────────────────
+// 1. shifts — Ээлжийн үндсэн бүртгэл
+// ──────────────────────────────────────────────
+model Shift {
+  id           String   @id @default(uuid()) @db.Uuid
+  operatorUid  String
+  operatorName String
+  stationCode  String
+  stationName  String?
+  shiftType    String
+  shiftDate    String
+  checkIn      String?
+  status       String   @default("Хадгалсан")
+  createdAt    DateTime @default(now())
+  shiftNumber  String?
+  formVersion  Int      @default(1)
+  submittedAt  String?
+
+  // Handover acceptance queue (used by /api/shifts?queryType=handover)
+  handoverAwaitingAcceptance Boolean @default(false)
+  handoverRequestedAt       String?
+  handoverAcceptedByUid    String?
+  handoverAcceptedByName   String?
+  handoverAcceptedAt       String?
+  handoverToOperatorUid      String?
+  handoverToOperatorName     String?
+  handoverTimingStatus       String?
+  handoverTimingReason       String?
+  handoverTimingRecordedAt   String?
+  handoverStage              String?  @default("none")
+  currentMasterUid           String?
+  currentMasterName          String?
+  currentMasterApprovedByUid String?
+  currentMasterApprovedByName String?
+  currentMasterApprovedAt    String?
+  currentMasterComment       String?
+  nextMasterUid              String?
+  nextMasterName             String?
+  nextMasterApprovedByUid    String?
+  nextMasterApprovedByName   String?
+  nextMasterApprovedAt       String?
+  nextMasterComment          String?
+  nextOperatorUid            String?
+  nextOperatorName           String?
+  handoverFinalAcceptedAt    String?
+  handoverReturnedByUid      String?
+  handoverReturnedByName     String?
+  handoverReturnedAt         String?
+  handoverReturnReason       String?
+
+  checkOut                  String?
+  operatorShiftCompleted    Boolean  @default(false)
+  masterApproved            Boolean  @default(false)
+  masterApprovedBy          String?
+  masterApprovedDate        String?
+  shiftMasterUid            String?
+
+  adminApproved             Boolean  @default(false)
+  adminApprovedBy           String?
+  adminApprovedDate         String?
+
+  /// Ээлж дуусгагчийн сонгосон «батлах админ» — ЧИГЛҮҮЛЭЛТ, түгжээ биш.
+  /// Мэдэгдэл түүн рүү очиж, дараалалд харагдана; өөр админ мөн батлаж чадна
+  /// (сонгосон хүн ажил дээр байхгүй үед гацахаас сэргийлнэ).
+  approvalAdminUid          String?
+  approvalAdminName         String?
+
+  // Notes / free text (nullable — only populated by the relevant form)
+  notes                 String?  // shiftNotes / notes
+  hseInfo               String?
+  hseComment            String?
+  equipmentInfo         String?
+  equipmentComment      String?
+  explanation           String?  // ОНБ
+  totalNote             String?  // Y210
+  report                String?  // Y210 РАПОРТ
+  ingredientChangeNote  String?  // Y130
+  platformMaintenanceNote String? // Y140
+  moldMaintenanceNote   String?  // Y140
+  attentionNotes        String?
+  workPerformed         String?
+
+  // Signatures (different forms use different subsets)
+  sigHandingOver        String?
+  sigReceiving          String?
+  sigShiftMaster        String?
+  sigEngineer           String?  // Y310
+  sigMaster             String?  // Y400
+  sigOperator           String?  // ОНБ
+  sigTechnologistEngineer String? // ОНБ
+  sigChiefTechnologist  String?  // ОНБ
+  sigQualitySpecialist  String?  // ОНБ
+
+  // Y110 — flattened nested objects
+  pipelineStatus        String?
+  pipelineComment       String?
+  airPressureStatus     String?
+  airPressureComment    String?
+  lubricationStatus     String?
+  lubricationComment    String?
+  rawCementUnloadTons   String?
+  rawWagonCleaningCount String?
+
+  // Workplace tidiness (Y110, Y120, Y121, Y130)
+  workplaceStatus       String?
+  workplaceComment      String?
+
+  // Relations
+  equipmentInspections EquipmentInspection[]
+  measurementRows      MeasurementRow[]
+  productionLogs       ProductionLog[]
+  repairEntries        RepairEntry[]
+  ingredientRecords    IngredientRecord[]
+  flowMetricsTotal     FlowMetricsTotal?
+  shiftImages          ShiftImage[]
+  handoverApprovals    ShiftHandoverApproval[]
+
+  @@index([operatorUid, shiftDate])
+  @@index([stationCode, shiftDate])
+  @@map("shifts")
+}
+
+model ShiftHandoverApproval {
+  id        String   @id @default(uuid()) @db.Uuid
+  shiftId   String   @db.Uuid
+  shift     Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  stage     String
+  action    String
+  actorUid  String
+  actorName String?
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@index([shiftId, createdAt])
+  @@index([stage, action])
+  @@map("shift_handover_approvals")
+}
+
+// ──────────────────────────────────────────────
+// 2. equipment_inspections — Тоног төхөөрөмжийн шалгалт
+// ──────────────────────────────────────────────
+model EquipmentInspection {
+  id        String @id @default(uuid()) @db.Uuid
+  shiftId   String @db.Uuid
+  shift     Shift  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+
+  tableType  String  // 'inspection', 'compressor', 'section', 'process', 'equipment_ctrl', 'failure', 'silo', 'repair_equipment'
+  sortOrder  Int     @default(0)
+  itemKey    String?
+  itemLabel  String?
+  status     String? // 'normal' / 'abnormal' / ''
+  comment    String?
+
+  // Y310 compressor extra fields
+  statusOk           String?
+  cleaned            String?
+  emergencyEquipment String?
+
+  // Y310 section extra fields
+  labelEn        String?
+  labelMn        String?
+  equipmentNotes String?
+  nextShiftWork  String?
+
+  // Y310 repair equipment
+  weeklyInspection String?
+
+  // Y400 process control
+  requirement String?
+
+  // Y110 silo
+  percent String?
+
+  // Y120 milled materials (unit + total)
+  unit  String?
+  total String?
+
+  @@index([shiftId])
+  @@map("equipment_inspections")
+}
+
+// ──────────────────────────────────────────────
+// 3. measurement_rows — Цаг хэмжилтийн мөрүүд
+// ──────────────────────────────────────────────
+model MeasurementRow {
+  id        String @id @default(uuid()) @db.Uuid
+  shiftId   String @db.Uuid
+  shift     Shift  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  sortOrder Int    @default(0)
+
+  timeValue String? // common time field
+
+  // ── CAH02 ──
+  scheduledDay             String?
+  scheduledNight           String?
+  measuredTime             String?
+  lineVoltage              String?
+  transformerTempA         String?
+  transformerTempB         String?
+  transformerTempC         String?
+  transformerCurrentInput1 String?
+  transformerCurrentInput2 String?
+  dieselMotorHours         String?
+  dieselOilTemp            String?
+  fuel                     String?
+  mebu1Voltage             String?
+  mebu1Current             String?
+  mebu1SectionSwitch       String?
+  mebu2Voltage             String?
+  mebu2Current             String?
+  mebu2SectionSwitch       String?
+
+  // ── CAH02 35kV ──
+  measuredTime35           String?
+  lineVoltage35            String?
+  transHighCurrentT1       String?
+  transHighCurrentT2       String?
+  transHighCurrentWindoor   String?
+  transLowCurrentInput1    String?
+  transLowCurrentInput2    String?
+
+  // ── Y180 ──
+  furnacePressure    String?
+  steamLinePressure  String?
+  totalProductOut    String?
+  totalProductIn     String?
+
+  // ── Y210 ──
+  kilnPowerTransmissionPct       String?
+  kilnPressureBar                String?
+  kilnLevelPct                   String?
+  boosterAmountPct               String?
+  screenTempMaxC                 String?
+  grateCastIronTempMaxC          String?
+  condensateTank3LevelPct        String?
+  condensateTank3TempC           String?
+  feedWaterToTankTempC           String?
+  ashDischargeHours              String?
+  feedWaterBankPressurePct       String?
+  feedWaterBankLevelPct          String?
+  feedWaterBankTempPct           String?
+  stateMeterReadingCondensateM3  String?
+  kilnWaterReadingM3             String?
+  kilnFiringPct                  String?
+  airSupplyPct                   String?
+  airSuctionPct                  String?
+  y210Status                     String? // water softener status
+  saltConsumptionKg              String?
+  kilnOperatingHours             String?
+  coalBuckets                    String?
+
+  // Relations
+  autoclaveEntries AutoclaveEntry[]
+
+  @@index([shiftId])
+  @@map("measurement_rows")
+}
+
+// ──────────────────────────────────────────────
+// 4. autoclave_entries — Автоклав (Y180)
+// ──────────────────────────────────────────────
+model AutoclaveEntry {
+  id               String         @id @default(uuid()) @db.Uuid
+  measurementRowId String         @db.Uuid
+  measurementRow   MeasurementRow @relation(fields: [measurementRowId], references: [id], onDelete: Cascade)
+
+  autoclaveNumber Int
+  startTime       String?
+  startRoller     String?
+  stopTime        String?
+  stopRoller      String?
+  outTrack1       String?
+  outTrack2       String?
+  inTrack3        String?
+  inTrack4        String?
+
+  @@index([measurementRowId])
+  @@map("autoclave_entries")
+}
+
+// ──────────────────────────────────────────────
+// 5. production_logs — Үйлдвэрлэлийн бүртгэл
+// ──────────────────────────────────────────────
+model ProductionLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  shiftId   String   @db.Uuid
+  shift     Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  logType   String   // 'casting', 'cutting', 'product', 'flow_metric', 'product_summary', 'indicator'
+  sortOrder Int      @default(0)
+  data      Json     // JSONB — structure varies per logType
+  createdAt DateTime @default(now())
+
+  @@index([shiftId])
+  @@index([logType, createdAt])
+  @@map("production_logs")
+}
+
+// ──────────────────────────────────────────────
+// 6. repair_entries — Засварын бүртгэл
+// ──────────────────────────────────────────────
+model RepairEntry {
+  id        String @id @default(uuid()) @db.Uuid
+  shiftId   String @db.Uuid
+  shift     Shift  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  entryType String // 'repair_work' | 'electrical_repair'
+  sortOrder Int    @default(0)
+
+  // Y310 repair work fields
+  itemKey        String?
+  labelEn        String?
+  labelMn        String?
+  section        String?
+  unplannedTime  String?
+  plannedTime    String?
+  comment        String?
+  additionalWork String?
+
+  // Y320 electrical repair fields
+  enteredRepairDate  String?
+  leftRepairDate     String?
+  shiftValue         String?  @map("shift_value")
+  repairStartTime    String?
+  repairEndTime      String?
+  toolReceivedTime   String?
+  partsReceivedTime  String?
+  affectedProduction String?
+  shiftNumber        String?
+  repairType         String?  // '' | 'major' | 'routine' | 'planned' | 'sudden'
+  damageCondition    String?
+  damageCause        String?
+  repairWorkDone     String?
+  performerName      String?
+  performerPosition  String?
+  performerManHours  String?
+  receiverName       String?
+  receiverPosition   String?
+  totalDuration      String?
+  workerCount        String?
+
+  @@index([shiftId])
+  @@map("repair_entries")
+}
+
+// ──────────────────────────────────────────────
+// 7. ingredient_records — ОНБ орц бүртгэл
+// ──────────────────────────────────────────────
+model IngredientRecord {
+  id        String @id @default(uuid()) @db.Uuid
+  shiftId   String @db.Uuid
+  shift     Shift  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+  sortOrder Int    @default(0)
+
+  itemKey       String?
+  label         String?
+  originalValue String?
+  changedValue  String?
+
+  @@index([shiftId])
+  @@map("ingredient_records")
+}
+
+// ──────────────────────────────────────────────
+// 8. flow_metrics_totals — Y121 нийт урсгал
+// ──────────────────────────────────────────────
+model FlowMetricsTotal {
+  id      String @id @default(uuid()) @db.Uuid
+  shiftId String @unique @db.Uuid
+  shift   Shift  @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+
+  workingStarted      String?
+  workingStopped      String?
+  sampleTime          String?
+  currentA            String?
+  electricityKwh      String?
+  waterM3h            String?
+  sandTh              String?
+  millDensityKgM3     String?
+  electricityKwhPerT  String?
+
+  @@map("flow_metrics_totals")
+}
+
+// ──────────────────────────────────────────────
+// 9. Олон үйлдэлт модулиуд (Maintenance, HSE, MasterSchedule, etc.)
+// ──────────────────────────────────────────────
+
+model ShiftImage {
+  id             String   @id @default(uuid()) @db.Uuid
+  shiftId        String   @db.Uuid
+  shift          Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+
+  section        String   @default("inspection")
+  rowKey         String?
+  rowLabel       String?
+  caption        String?
+  storagePath    String   @unique
+  publicUrl      String
+  mimeType       String
+  sizeBytes      Int
+  uploadedByUid  String
+  uploadedByName String?
+  reviewStatus   String   @default("pending_review")
+  reviewComment  String?
+  reviewedByUid  String?
+  reviewedByName String?
+  reviewedAt     DateTime?
+  createdAt      DateTime @default(now())
+
+  @@index([shiftId])
+  @@index([shiftId, rowKey])
+  @@index([shiftId, reviewStatus])
+  @@map("shift_images")
+}
+
+model MasterSchedule {
+  id          String   @id @default(uuid()) @db.Uuid
+  shiftDate   String
+  shiftType   String
+  stationCode String
+  masterUid   String
+  masterName  String?
+  operatorUid String?
+  createdAt   DateTime @default(now())
+
+  @@map("master_schedules")
+}
+
+/// Сарын/өдрийн операторын ээлжийн томилолт (дамжлага + өдөр + ээлж)
+model OperatorSchedule {
+  id            String   @id @default(uuid()) @db.Uuid
+  shiftDate     String
+  shiftType     String
+  stationCode   String
+  operatorUid   String
+  operatorName  String?
+  createdAt     DateTime @default(now())
+
+  @@index([operatorUid, shiftDate])
+  @@index([stationCode, shiftDate])
+  @@map("operator_schedules")
+}
+
+/// Оператор хоорондын ээлж солилцох хүсэлт (хүсэлт → зөвшөөрөл), snapshot-style, FK-гүй
+model ShiftSwapRequest {
+  id                   String    @id @default(uuid()) @db.Uuid
+  requesterScheduleId  String
+  requesterUid         String
+  requesterName        String?
+  requesterShiftDate   String
+  requesterShiftType   String
+  requesterStationCode String
+  targetScheduleId     String
+  targetUid            String
+  targetName           String?
+  targetShiftDate      String
+  targetShiftType      String
+  targetStationCode    String
+  message              String?
+  status               String    @default("pending") // pending | accepted | rejected | cancelled
+  decisionNote         String?
+  decidedByUid         String?
+  decidedByName        String?
+  decidedAt            DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@index([requesterUid, status])
+  @@index([targetUid, status])
+  @@index([requesterScheduleId])
+  @@index([targetScheduleId])
+  @@map("shift_swap_requests")
+}
+
+/// Тохиргоо: давтамжит бүртгэлийн интервал (цаг), ээлжийн цагийн цонх (ISO time), strict горим
+model SystemSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("system_settings")
+}
+
+model Announcement {
+  id             String   @id @default(uuid()) @db.Uuid
+  title          String
+  content        String   @db.Text
+  /** info | warning | danger */
+  type           String   @default("info")
+  isActive       Boolean  @default(true)
+  expiresAt      DateTime?
+  authorUid      String
+  authorName     String?
+  authorRole     String?
+  /** Target audience filters */
+  targetRoles    String[] @default([])
+  targetStations String[] @default([])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  reads          AnnouncementRead[]
+
+  @@map("announcements")
+}
+
+model AnnouncementRead {
+  id             String   @id @default(uuid()) @db.Uuid
+  announcementId String   @db.Uuid
+  userId         String
+  userName       String?
+  readAt         DateTime @default(now())
+
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userId])
+  @@map("announcement_reads")
+}
+
+/// ХАБ заавар / баримт бичиг (таблет дээр харуулах)
+model InstructionDocument {
+  id             String   @id @default(uuid()) @db.Uuid
+  title          String
+  description    String?
+  fileUrl        String
+  fileName       String?
+  stationCode    String?
+  roleTarget     String   @default("operator")
+  isActive       Boolean  @default(true)
+  uploadedByUid  String
+  uploadedByName String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  acknowledgements InstructionAcknowledgement[]
+
+  @@index([stationCode, isActive])
+  @@index([roleTarget, isActive])
+  @@map("instruction_documents")
+}
+
+model InstructionAcknowledgement {
+  id             String   @id @default(uuid()) @db.Uuid
+  documentId     String   @db.Uuid
+  document       InstructionDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  operatorUid    String
+  operatorName   String?
+  stationCode    String?
+  acknowledgedAt DateTime @default(now())
+
+  @@unique([documentId, operatorUid])
+  @@index([operatorUid])
+  @@index([documentId])
+  @@map("instruction_acknowledgements")
+}
+
+model MaintenanceRequest {
+  id             String   @id @default(uuid()) @db.Uuid
+  stationCode    String
+  equipmentName  String?
+  reportedByUid  String
+  reportedByName String?
+  description    String
+  priority       String?
+  status         String   @default("Open")
+  assignedToUid  String?
+  assignedToName String?
+  notes          String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("maintenance_requests")
+}
+
+model HseLog {
+  id                  String   @id @default(uuid()) @db.Uuid
+  shiftId             String?  @db.Uuid
+  stationCode         String
+  operatorUid         String
+  operatorName        String?
+  incidents           String   // JSON stringified array of incidents
+  generalComment      String?
+  hseEngineerNote     String?
+  hseEngineerApproved Boolean  @default(false)
+  hseApprovedByUid    String?
+  hseApprovedByName   String?
+  hseApprovedAt       DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@map("hse_logs")
+}
+
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String
+  kind      String
+  dedupeKey String?
+  title     String
+  body      String
+  link      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId, dedupeKey, createdAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  actorUid   String
+  actorName  String?
+  action     String
+  entityType String
+  entityId   String
+  details    String?
+  createdAt  DateTime @default(now())
+
+  @@map("audit_logs")
+}
+
+// NextAuth (PrismaAdapter) models
+// ──────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  // Евроблок хэрэглэгчийн эрх/зөвшөөрөл
+  role        String   @default("operator")
+  isApproved  Boolean  @default(true)
+  /// Оператор бол өөрийн станц, мастер бол мастер станц (ҮЯ-099/310/400/410).
+  /// Багийн хуваарь оноохын үндэс — дутуу бол тухайн хүн алгасагдана.
+  stationCode String?
+  /// Ээлжийн баг: '1' | '2' | '3' | null. Багаар хуваарь оноох үндэс.
+  shiftGroup  String?
+  passwordHash String?
+  tabletAccessAllowed Boolean @default(true)
+  mobileAccessAllowed Boolean @default(false)
+  /// Сорт бүртгэлийн модульд рам ба сортын үүргийг НЭГ акаунт дээр хослуулна.
+  /// `stationCode`-оос үл хамааран `lib/sort-api-permissions.ts`-д
+  /// isRamOperator/isSortOperator хоёуланг нь `true` болгоно.
+  sortDualRole Boolean @default(false)
+
+  accounts    Account[]
+  sessions    Session[]
+  devices     UserDevice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([shiftGroup])
+  @@map("users")
+}
+
+model UserDevice {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceId      String
+  deviceType    String   @default("unknown")
+  userAgent     String?
+  platform      String?
+  ipAddress     String?
+  allowed       Boolean  @default(false)
+  blockedReason String?
+  firstSeenAt   DateTime @default(now())
+  lastSeenAt    DateTime @default(now())
+
+  @@unique([userId, deviceId])
+  @@index([userId])
+  @@index([deviceType])
+  @@map("user_devices")
+}
+
+model ControlStation {
+  id              String   @id @default(uuid()) @db.Uuid
+  code            String   @unique
+  name            String
+  isActive        Boolean  @default(true)
+  isMasterStation Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("control_stations")
+}
+
+/// @deprecated Хяналтын бүтэц (мастер × оператор матриц) — 2026-07-29-нд `users.shiftGroup`
+/// + `supervisorStationFor()` -ээр орлуулагдсан. Код энэ хүснэгтийг УНШИХАА БОЛЬСОН.
+/// Хүснэгтийг эргэж харах/шалгах боломжтой байлгах үүднээс түр үлдээв —
+/// шинэ систем тогтворжсоны дараа тусдаа migration-аар drop хийнэ.
+/// docs/shift-crew-architecture.md §8
+model ControlAssignment {
+  id           String   @id @default(uuid()) @db.Uuid
+  stationCode  String
+  stationName  String?
+  operatorUid  String?
+  operatorName String?
+  masterUid    String
+  masterName   String?
+  masterStationCode String?
+  masterStationName String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([stationCode, operatorUid, masterUid])
+  @@index([masterUid, isActive])
+  @@index([operatorUid, isActive])
+  @@index([stationCode, isActive])
+  @@map("control_assignments")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ──────────────────────────────────────────────
+// Batch — Холимогчийн үйлдвэрлэлийн партийн бүртгэл
+// ──────────────────────────────────────────────
+model Batch {
+  id                  String    @id @default(uuid()) @db.Uuid
+  firebirdId          Int?      @unique
+
+  orderId             Int?
+  recipeId            Int?
+  id2                 Int?
+  productionLine      Int?
+  destinationTarget   Int?
+
+  waterAddTimeActual  Int?
+  mxTime4Setp         Int?
+  mxNbr               Int?
+  temperatureSetp     Float?
+  status              Int?
+  mxStartTime1        DateTime?
+  mxTime1Setp         Int?
+  mxWaterType         Int?
+  trReadyTime         DateTime?
+  mxReadyTime         DateTime?
+  destinationActual   Int?
+  trStartTime         DateTime?
+  mxTimeDischSetp     Int?
+  mxTime2Actual       Int?
+  readyTime           DateTime?
+  mxTime1Actual       Int?
+  temperatureActual   Float?
+  mxTime2Setp         Int?
+  mxStartTimeDisch    DateTime?
+  excepSequence       Int?
+  mxTimeTotalSetp     Int?
+  mxSteamType         Int?
+  mxFillingTime       Int?
+  mxStartTime2        DateTime?
+  startTime           DateTime?
+  mxTime3Actual       Int?
+  mxTime3Setp         Int?
+  mxStartTimeFill     DateTime?
+  mxTime4Actual       Int?
+  dischargingMassflow Float?
+  choppersInUse       Int?
+  actualNumberOfBatch Int?
+  batchType           Int?
+  mxTimeDischActual   Int?
+  trLineNbr           Int?
+  mxTimeTotalActual   Int?
+  steamAddTimeActual  Int?
+  metalDetections     Int?
+
+  @@map("batch")
+}
+
+// ──────────────────────────────────────────────
+// Destination — Хүргэлтийн чиглэл
+// ──────────────────────────────────────────────
+model Destination {
+  id             String  @id @default(uuid()) @db.Uuid
+  firebirdId     Int?    @unique
+  description    String?
+  productionLine Int?
+
+  @@map("destination")
+}
+
+// ──────────────────────────────────────────────
+// Material — Түүхий эд
+// ──────────────────────────────────────────────
+model Material {
+  id          String    @id @default(uuid()) @db.Uuid
+  firebirdId  Int?      @unique
+  gmf         Float?
+  density     Float?
+  savingTime  DateTime?
+  name        String?
+  batchprint  Int?
+  code        String?
+  totalcount  Int?
+  unit        String?
+  userName    String?
+
+  @@map("material")
+}
+
+// ──────────────────────────────────────────────
+// Mixer — Холимогч
+// ──────────────────────────────────────────────
+model Mixer {
+  id             String @id @default(uuid()) @db.Uuid
+  firebirdId     Int?   @unique
+  positionNumber Int?
+
+  @@map("mixer")
+}
+
+// ──────────────────────────────────────────────
+// ProductOrder — Бүтээгдэхүүний захиалга
+// ──────────────────────────────────────────────
+model ProductOrder {
+  id                     String    @id @default(uuid()) @db.Uuid
+  firebirdId             Int?      @unique
+  recipeId               Int?
+  productionLine         Int?
+  originalDestination    Int?
+  extText2               String?
+  unit                   String?
+  name                   String?
+  extSmall1              Int?
+  batchSize              Float?
+  readyTime              DateTime?
+  orderTime              DateTime?
+  code                   String?
+  extText1               String?
+  numberOfBatches        Int?
+  numberOfBatchesActual  Int?
+  extText3               String?
+  extSmall2              Int?
+
+  @@map("product_order")
+}
+
+// ──────────────────────────────────────────────
+// Recipe — Жор
+// ──────────────────────────────────────────────
+model Recipe {
+  id              String    @id @default(uuid()) @db.Uuid
+  firebirdId      Int?      @unique
+  inuse           Int?
+  savedBy         String?
+  totalTarget     Float?
+  productVersion  Int?
+  choppersInUse   Int?
+  dischTime       Int?
+  destination     Int?
+  savedTime       DateTime?
+  customeVersion  Int?
+  name            String?
+  productionLine  Int?
+  code            String?
+  mxTime2         Int?
+  totalWaterRpc   Float?
+  totalWaterKg    Float?
+  comment         String?
+  temperature     Float?
+  mxTime3         Int?
+  mxNbr           Int?
+  mxTime1         Int?
+  productNbr      Int?
+
+  @@map("recipe")
+}
+
+// ──────────────────────────────────────────────
+// RecipeComponent — Жорын бүрэлдэхүүн
+// ──────────────────────────────────────────────
+model RecipeComponent {
+  id           String  @id @default(uuid()) @db.Uuid
+  recipeId     Int?
+  rowNbr       Int?
+  materialId   Int?
+  scale        Int?
+  silo         Int?
+  setpointPrc  Float?
+  setpoint     Float?
+  tolerancePos Float?
+  toleranceNeg Float?
+  preact       Float?
+  extParam1    Float?
+  extParam2    Float?
+  unit         String?
+  code         String?
+  name         String?
+  totalcount   Int?
+  batchprint   Int?
+  vlk          Float?
+  sv           Float?
+
+  @@unique([recipeId, rowNbr])
+  @@map("recipe_component")
+}
+
+// ──────────────────────────────────────────────
+// Scale — Жин хэмжих
+// ──────────────────────────────────────────────
+model Scale {
+  id             String  @id @default(uuid()) @db.Uuid
+  firebirdId     Int?    @unique
+  unit           String?
+  maxLimit       Int?
+  positionNumber Int?
+  format         String?
+  scaleStep      Int?
+  decimals       Int?
+  name           String?
+  productionLine Int?
+
+  @@map("scale")
+}
+
+// ──────────────────────────────────────────────
+// Silo — Силос
+// ──────────────────────────────────────────────
+model Silo {
+  id               String  @id @default(uuid()) @db.Uuid
+  firebirdId       Int?    @unique
+  positionNumber   Int?
+  name             String?
+  scale            Int?
+  material         Int?
+  spareSilo        Int?
+  accuracy         Float?
+  inventoryLevel   Float?
+  volume           Float?
+  scaleDosingLine  Int?
+
+  @@map("silo")
+}
+
+// ──────────────────────────────────────────────
+// Transport — Тээвэрлэлт
+// ──────────────────────────────────────────────
+model Transport {
+  id             String @id @default(uuid()) @db.Uuid
+  firebirdId     Int?   @unique
+  positionNumber Int?
+
+  @@map("transport")
+}
+
+// ──────────────────────────────────────────────
+// SortWorkRecord — Сорт бүртгэл (ҮЯ-190)
+// ──────────────────────────────────────────────
+model SortWorkRecord {
+  id      String @id @default(uuid()) @db.Uuid
+
+  // Header — РАМ оператор бөглөнө
+  shiftNo         String  @default("")
+  headerCNumber   String  @default("")  // Ц.дугаар → Firebird BATCH.ID
+  headerPoured    String  @default("")
+  headerCut       String  @default("")
+  // Цутгасан/зүссэн ЦАГ. `headerPoured`/`headerCut` нь зөвхөн ЭЭЛЖ (Өдрийн/Шөнийн)
+  // хадгалдаг тул Excel экспортын «Цутгасан цаг»/«Зүссэн цаг» багана дүүргэх эх
+  // сурвалжгүй, үргэлж хоосон гардаг байв. UTC-ээр хадгална (харуулахдаа UTC+8).
+  // Хуучин бүртгэлд байхгүй тул nullable — заавал бөглөх талбар биш.
+  pouredAt        DateTime?
+  cutAt           DateTime?
+  autoclaveNo     String  @default("")
+  sort1FrameNo    String  @default("")
+  sort1SizeMm     String  @default("")
+  sort1Desc       String  @default("")
+  ramDefectCode   String  @default("") // РАМ операторын урьдчилан сонгосон алдааны код (заавал биш)
+  specialDualMode Boolean @default(false)
+
+  // Sort1 — СОРТ оператор бөглөнө
+  sort1CutMm  String @default("")
+  sort1Qty    Int    @default(0)
+  sort1M3     Float  @default(0)
+  sort1Qty200 Int    @default(0)
+  sort1M3200  Float  @default(0)
+  sort1Qty100 Int    @default(0)
+  sort1M3100  Float  @default(0)
+
+  // Sort2
+  sort2Code   String @default("")
+  sort2CutMm  String @default("")
+  sort2Qty    Int    @default(0)
+  sort2M3     Float  @default(0)
+  sort2Desc   String @default("")
+  sort2Qty200 Int    @default(0)
+  sort2M3200  Float  @default(0)
+  sort2Qty100 Int    @default(0)
+  sort2M3100  Float  @default(0)
+
+  // Sort3
+  sort3Code   String @default("")
+  sort3CutMm  String @default("")
+  sort3Qty    Int    @default(0)
+  sort3M3     Float  @default(0)
+  sort3Desc   String @default("")
+  sort3Qty200 Int    @default(0)
+  sort3M3200  Float  @default(0)
+  sort3Qty100 Int    @default(0)
+  sort3M3100  Float  @default(0)
+
+  // Дутагдал
+  deficitCutMm  String @default("")
+  deficitQty    Int    @default(0)
+  deficitM3     Float  @default(0)
+  deficitDesc   String @default("")
+  deficitQty200 Int    @default(0)
+  deficitM3200  Float  @default(0)
+  deficitQty100 Int    @default(0)
+  deficitM3100  Float  @default(0)
+
+  // Төлөв ба операторын мэдээлэл
+  status        String   @default("draft")  // draft | waiting_sort | completed | deleted
+  createdByUid  String
+  createdByName String?
+  sortedByUid   String?
+  sortedByName  String?
+  createdAt     DateTime @default(now())
+  completedAt   DateTime?
+
+  @@index([headerCNumber])
+  @@index([shiftNo])
+  @@index([status, createdAt])
+  @@index([createdByUid])
+  @@map("sort_work_records")
+}

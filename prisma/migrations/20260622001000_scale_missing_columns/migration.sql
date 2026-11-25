@@ -1,0 +1,1 @@
+ALTER TABLE "scale" ADD COLUMN IF NOT EXISTS "productionLine" INTEGER;

@@ -1,0 +1,200 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* `dark:` variant нь <html class="dark">-аас хамаарна (системийн тохиргооноос биш) — ThemeToggle сэлгэнэ. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: white;
+}
+
+/* ───────────────────────── Харанхуй горим ─────────────────────────
+ * Компонент бүрт `dark:` класс нэмэхийн оронд Tailwind-ийн өнгөний хувьсагчдыг <html class="dark">
+ * дээр дахин тодорхойлно (Tailwind 4-ийн utility бүр өнгийг `var(--color-…)`-аас уншдаг):
+ *  - white = картын дэвсгэр; саарал урвуу (цайвар дэвсгэр/хүрээ ↔ бараан текст);
+ *  - өнгөт цайвар дэвсгэр/хүрээ (…-50/100/200) → бараан туяа;
+ *  - өнгөт бараан текст (…-800/900/950) → цайвар (эдгээр нь дэвсгэрт хэрэглэгддэггүй).
+ * …-600/700 нь товчны дэвсгэрт (`hover:bg-orange-700`) хэрэглэгддэг тул хувьсагчийг нь биш,
+ * зөвхөн текст классыг доор цайруулна.
+ */
+.dark {
+  color-scheme: dark;
+
+  --color-white: #161d2a;
+
+  --color-gray-50: #0f141d;
+  --color-gray-100: #1e2633;
+  --color-gray-200: #2b3444;
+  --color-gray-300: #3b4557;
+  --color-gray-400: #6b7588;
+  --color-gray-500: #939cab;
+  --color-gray-600: #adb5c2;
+  --color-gray-700: #c8ced8;
+  --color-gray-800: #dde2e9;
+  --color-gray-900: #edf0f4;
+  --color-gray-950: #f7f9fb;
+
+  --color-slate-50: #0f141d;
+  --color-slate-100: #1e2633;
+  --color-slate-200: #2b3444;
+  --color-slate-300: #3b4557;
+  --color-slate-400: #6b7588;
+  --color-slate-500: #939cab;
+  --color-slate-600: #adb5c2;
+  --color-slate-700: #c8ced8;
+  --color-slate-800: #dde2e9;
+  --color-slate-900: #edf0f4;
+  --color-slate-950: #f7f9fb;
+
+  --color-orange-50: #2b1d14;
+  --color-orange-100: #3b2514;
+  --color-orange-200: #5c3615;
+  --color-orange-800: #fed7aa;
+  --color-orange-900: #ffedd5;
+  --color-orange-950: #fff7ed;
+
+  --color-amber-50: #2a2312;
+  --color-amber-100: #3a2f12;
+  --color-amber-200: #5a4513;
+  --color-amber-800: #fde68a;
+  --color-amber-900: #fef3c7;
+  --color-amber-950: #fffbeb;
+
+  --color-red-50: #2d1a1e;
+  --color-red-100: #3e1d23;
+  --color-red-200: #5e252c;
+  --color-red-800: #fecaca;
+  --color-red-900: #fee2e2;
+  --color-red-950: #fef2f2;
+
+  --color-green-50: #14261a;
+  --color-green-100: #153322;
+  --color-green-200: #185030;
+  --color-green-800: #bbf7d0;
+  --color-green-900: #dcfce7;
+  --color-green-950: #f0fdf4;
+
+  --color-emerald-50: #12261f;
+  --color-emerald-100: #133428;
+  --color-emerald-200: #14513a;
+  --color-emerald-800: #a7f3d0;
+  --color-emerald-900: #d1fae5;
+  --color-emerald-950: #ecfdf5;
+
+  --color-blue-50: #15203a;
+  --color-blue-100: #182a4c;
+  --color-blue-200: #1d3c6e;
+  --color-blue-800: #bfdbfe;
+  --color-blue-900: #dbeafe;
+  --color-blue-950: #eff6ff;
+
+  --color-yellow-50: #29250f;
+  --color-yellow-100: #39330f;
+  --color-yellow-200: #574c10;
+  --color-yellow-800: #fef08a;
+  --color-yellow-900: #fef9c3;
+
+  --color-purple-50: #241a33;
+  --color-purple-100: #2f1f45;
+  --color-purple-200: #432a66;
+  --color-purple-800: #e9d5ff;
+  --color-purple-900: #f3e8ff;
+
+  --color-violet-50: #211b36;
+  --color-violet-100: #2b2149;
+  --color-violet-200: #3d2d6b;
+  --color-violet-800: #ddd6fe;
+  --color-violet-900: #ede9fe;
+
+  --color-teal-50: #11262a;
+  --color-teal-100: #123438;
+  --color-teal-200: #144f55;
+  --color-teal-800: #99f6e4;
+  --color-teal-900: #ccfbf1;
+
+  --color-cyan-50: #11252d;
+  --color-cyan-100: #12333d;
+  --color-cyan-200: #134d5c;
+  --color-cyan-800: #a5f3fc;
+  --color-cyan-900: #cffafe;
+
+  --color-rose-50: #2d1a22;
+  --color-rose-100: #3e1d2b;
+  --color-rose-200: #5e2540;
+  --color-rose-800: #fecdd3;
+  --color-rose-900: #ffe4e6;
+
+  --color-indigo-50: #1a1d3a;
+  --color-indigo-100: #20254d;
+  --color-indigo-200: #2b3370;
+  --color-indigo-800: #c7d2fe;
+  --color-indigo-900: #e0e7ff;
+
+  --color-sky-50: #12233a;
+  --color-sky-100: #13304d;
+  --color-sky-200: #164870;
+  --color-sky-800: #bae6fd;
+  --color-sky-900: #e0f2fe;
+}
+
+.dark body {
+  color: var(--color-gray-900);
+  background: var(--color-gray-50);
+}
+
+/* `white` картын өнгө болсон тул өнгөт товч/толгой дээрх цагаан текст цагаан хэвээр. */
+.dark .text-white {
+  color: #fff;
+}
+
+/* Бараан товч/таб (`bg-gray-900 text-white`) харанхуй горимд цайвар товч бараан текстэй болно. */
+.dark :is(.bg-gray-900, .bg-slate-900).text-white {
+  color: #0f141d;
+}
+
+/* Модалын хар бүрхүүл бараан хэвээр. */
+.dark .bg-gray-900\/60 {
+  background-color: rgb(0 0 0 / 0.6);
+}
+
+/* Өнгөт толгой (bg-orange-600) дээрх цайвар дэд текст цайвар хэвээр. */
+.dark .text-orange-100 {
+  color: #ffedd5;
+}
+
+/* Бараан дэвсгэр дээр уншигдахуйц болгож өнгөт текстийг (600/700) цайруулна. */
+.dark .text-orange-600 { color: #fb923c; }
+.dark .text-orange-700 { color: #fdba74; }
+.dark .text-amber-600 { color: #fbbf24; }
+.dark .text-amber-700 { color: #fcd34d; }
+.dark .text-red-600 { color: #f87171; }
+.dark .text-red-700 { color: #fca5a5; }
+.dark .text-green-600 { color: #4ade80; }
+.dark .text-green-700 { color: #86efac; }
+.dark .text-emerald-600 { color: #34d399; }
+.dark .text-emerald-700 { color: #6ee7b7; }
+.dark .text-blue-600 { color: #60a5fa; }
+.dark .text-blue-700 { color: #93c5fd; }
+.dark .text-yellow-600 { color: #facc15; }
+.dark .text-yellow-700 { color: #fde047; }
+.dark .text-purple-600 { color: #c084fc; }
+.dark .text-purple-700 { color: #d8b4fe; }
+.dark .text-violet-600 { color: #a78bfa; }
+.dark .text-violet-700 { color: #c4b5fd; }
+.dark .text-teal-600 { color: #2dd4bf; }
+.dark .text-teal-700 { color: #5eead4; }
+.dark .text-cyan-600 { color: #22d3ee; }
+.dark .text-cyan-700 { color: #67e8f9; }
+.dark .text-rose-600 { color: #fb7185; }
+.dark .text-rose-700 { color: #fda4af; }
+.dark .text-indigo-600 { color: #818cf8; }
+.dark .text-indigo-700 { color: #a5b4fc; }
+.dark .text-sky-600 { color: #38bdf8; }
+.dark .text-sky-700 { color: #7dd3fc; }

@@ -1,0 +1,161 @@
+-- batch
+ALTER TABLE "batch" ALTER COLUMN "waterAddTimeActual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTime4Setp" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxNbr" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "temperatureSetp" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "status" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxStartTime1" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTime1Setp" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxWaterType" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "trReadyTime" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxReadyTime" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "destinationActual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "trStartTime" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTimeDischSetp" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTime2Actual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "readyTime" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTime1Actual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "temperatureActual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTime2Setp" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxStartTimeDisch" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "excepSequence" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTimeTotalSetp" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxSteamType" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxFillingTime" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxStartTime2" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "startTime" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTime3Actual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTime3Setp" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxStartTimeFill" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTime4Actual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "dischargingMassflow" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "choppersInUse" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "actualNumberOfBatch" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "batchType" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTimeDischActual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "trLineNbr" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "mxTimeTotalActual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "steamAddTimeActual" DROP NOT NULL;
+ALTER TABLE "batch" ALTER COLUMN "metalDetections" DROP NOT NULL;
+
+-- destination
+ALTER TABLE "destination" ALTER COLUMN "description" DROP NOT NULL;
+ALTER TABLE "destination" ALTER COLUMN "productionLine" DROP NOT NULL;
+
+-- material
+ALTER TABLE "material" ALTER COLUMN "gmf" DROP NOT NULL;
+ALTER TABLE "material" ALTER COLUMN "density" DROP NOT NULL;
+ALTER TABLE "material" ALTER COLUMN "savingTime" DROP NOT NULL;
+ALTER TABLE "material" ALTER COLUMN "name" DROP NOT NULL;
+ALTER TABLE "material" ALTER COLUMN "batchprint" DROP NOT NULL;
+ALTER TABLE "material" ALTER COLUMN "code" DROP NOT NULL;
+ALTER TABLE "material" ALTER COLUMN "totalcount" DROP NOT NULL;
+ALTER TABLE "material" ALTER COLUMN "unit" DROP NOT NULL;
+ALTER TABLE "material" ALTER COLUMN "userName" DROP NOT NULL;
+
+-- mixer
+ALTER TABLE "mixer" ALTER COLUMN "positionNumber" DROP NOT NULL;
+
+-- product_order
+ALTER TABLE "product_order" ALTER COLUMN "extText2" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "unit" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "name" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "extSmall1" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "batchSize" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "readyTime" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "orderTime" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "code" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "extText1" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "numberOfBatches" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "numberOfBatchesActual" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "extText3" DROP NOT NULL;
+ALTER TABLE "product_order" ALTER COLUMN "extSmall2" DROP NOT NULL;
+
+-- recipe
+ALTER TABLE "recipe" ALTER COLUMN "inuse" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "savedBy" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "totalTarget" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "productVersion" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "choppersInUse" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "dischTime" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "destination" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "savedTime" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "customeVersion" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "name" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "productionLine" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "code" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "mxTime2" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "totalWaterRpc" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "totalWaterKg" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "comment" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "temperature" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "mxTime3" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "mxNbr" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "mxTime1" DROP NOT NULL;
+ALTER TABLE "recipe" ALTER COLUMN "productNbr" DROP NOT NULL;
+
+-- recipe_component
+ALTER TABLE "recipe_component" ALTER COLUMN "preact" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "para2" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "lastPartTarget" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "para5" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "tolerancePos" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "unit" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "firstCutActual" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "prefineFeed" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "feedTimePreFine" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "startTimeF" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "startTimeC" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "para1Field" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "actualValue" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "sequence" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "massflowFirstCut" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "para6" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "ioLine" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "moisture" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "code" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "feedTimeTotal" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "joggs" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "coarseFeed" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "readyTime" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "siloLevel" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "para1" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "para4" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "para3" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "partitionQnt" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "status" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "setpointCalculated" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "dosingRateCoarse" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "toleranceNeg" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "dosingRateFine" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "fineFeed" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "lastPartActual" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "recipeRow" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "feedTimeCoarse" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "setpointRecipe" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "componentType" DROP NOT NULL;
+ALTER TABLE "recipe_component" ALTER COLUMN "name" DROP NOT NULL;
+
+-- scale
+ALTER TABLE "scale" ALTER COLUMN "unit" DROP NOT NULL;
+ALTER TABLE "scale" ALTER COLUMN "maxLimit" DROP NOT NULL;
+ALTER TABLE "scale" ALTER COLUMN "positionNumber" DROP NOT NULL;
+ALTER TABLE "scale" ALTER COLUMN "format" DROP NOT NULL;
+ALTER TABLE "scale" ALTER COLUMN "scaleStep" DROP NOT NULL;
+ALTER TABLE "scale" ALTER COLUMN "decimals" DROP NOT NULL;
+ALTER TABLE "scale" ALTER COLUMN "name" DROP NOT NULL;
+
+-- silo
+ALTER TABLE "silo" ALTER COLUMN "volume" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "scaleDosingLine" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "userName" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "unit" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "positionNumber" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "code" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "accuracy" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "inventoryLevel" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "name" DROP NOT NULL;
+ALTER TABLE "silo" ALTER COLUMN "spareSilo" DROP NOT NULL;
+
+-- transport
+ALTER TABLE "transport" ALTER COLUMN "positionNumber" DROP NOT NULL;

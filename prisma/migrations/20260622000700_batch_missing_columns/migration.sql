@@ -1,0 +1,5 @@
+ALTER TABLE "batch" ADD COLUMN IF NOT EXISTS "orderId"           INTEGER;
+ALTER TABLE "batch" ADD COLUMN IF NOT EXISTS "recipeId"          INTEGER;
+ALTER TABLE "batch" ADD COLUMN IF NOT EXISTS "id2"               INTEGER;
+ALTER TABLE "batch" ADD COLUMN IF NOT EXISTS "productionLine"    INTEGER;
+ALTER TABLE "batch" ADD COLUMN IF NOT EXISTS "destinationTarget" INTEGER;

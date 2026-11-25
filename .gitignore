@@ -1,0 +1,71 @@
+node_modules/
+.next/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+!.env.production.example
+
+/generated/prisma
+
+# Local uploads / temp artifacts (do not commit)
+public/uploads/
+scratch/
+temp_doc.zip
+temp_docx_extract/
+
+# Deploy build output — bundles .next/standalone, which Next.js populates
+# with a copy of .env* at build time. Never commit this (see deploy-build.ps1).
+euroblock-deploy.zip
+
+# Түр зуурын скриптүүд (`__*.tmp.*`). Эдгээрт ихэвчлэн серверийн холболтын мөр,
+# нууц үг зэрэг ил бичигддэг тул ХЭЗЭЭ Ч commit хийхгүй.
+# Жишээ: `__setup-test.tmp.js` дотор PC-2-ийн DB нууц үг тайлбарт бичигдсэн байсан.
+__*.tmp.*
+
+# Database dump / backup — бодит ажилтны мэдээлэл агуулдаг.
+*.dump
+*.sql.gz
+*.backup
+
+# Build caches, deployment archives, and local runtime data
+*.tsbuildinfo
+/out/
+/dist/
+/build/
+.vercel/
+*.zip
+*.7z
+*.rar
+*.tar
+*.tgz
+*.tar.gz
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+/backups/
+/dumps/
+/logs/
+/uploads/
+
+# Private keys, credentials, and machine-specific configuration
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa*
+id_ed25519*
+.npmrc
+.netrc
+credentials*.json
+service-account*.json
+.claude/settings.local.json
+.codex/
+.idea/
+.vscode/
+Thumbs.db
+
+*.zip.sha256

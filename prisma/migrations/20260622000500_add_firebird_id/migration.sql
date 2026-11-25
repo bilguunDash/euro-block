@@ -1,0 +1,21 @@
+ALTER TABLE "batch"             ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "destination"       ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "material"          ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "mixer"             ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "product_order"     ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "recipe"            ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "recipe_component"  ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "scale"             ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "silo"              ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+ALTER TABLE "transport"         ADD COLUMN IF NOT EXISTS "firebirdId" INTEGER;
+
+CREATE UNIQUE INDEX IF NOT EXISTS "batch_firebirdId_key"            ON "batch"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "destination_firebirdId_key"      ON "destination"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "material_firebirdId_key"         ON "material"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "mixer_firebirdId_key"            ON "mixer"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "product_order_firebirdId_key"    ON "product_order"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "recipe_firebirdId_key"           ON "recipe"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "recipe_component_firebirdId_key" ON "recipe_component"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "scale_firebirdId_key"            ON "scale"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "silo_firebirdId_key"             ON "silo"("firebirdId");
+CREATE UNIQUE INDEX IF NOT EXISTS "transport_firebirdId_key"        ON "transport"("firebirdId");
